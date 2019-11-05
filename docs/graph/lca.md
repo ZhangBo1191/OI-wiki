@@ -5,6 +5,8 @@
 
 ## 性质
 
+> 本节 **性质** 部分内容翻译自 [wcipeg](http://wcipeg.com/wiki/Lowest_common_ancestor) ，并做过修改。
+
 1.   $\text{LCA}({u})=u$ ；
 2.   $u$ 是 $v$ 的祖先，当且仅当 $\text{LCA}(u,v)=u$ ；
 3.  如果 $u$ 不为 $v$ 的祖先并且 $v$ 不为 $u$ 的祖先，那么 $u,v$ 分别处于 $\text{LCA}(u,v)$ 的两棵不同子树中；
@@ -29,7 +31,7 @@
 在第二阶段中，我们从最大的 $i$ 开始循环尝试，一直尝试到 $0$ （包括 $0$ ），如果 `fa[u][i] != fa[v][i]` ，则令 `u = fa[u][i]; v = fa[v][i]` ，那么最后的 LCA 为 `fa[u][0]` 。
 
 !!! 例题
-    CODEVS2370[小机房的树](http://codevs.cn/problem/2370/)树上最短路查询
+    CODEVS2370 [小机房的树](http://codevs.cn/problem/2370/) 树上最短路查询
 
 可先求出 LCA，再结合性质 $7$ 进行解答。也可以直接在求 LCA 时求出结果。
 以下代码仅供参考。
@@ -103,26 +105,26 @@ int main() {
 
 ### Tarjan 算法
 
-`Tarjan算法` 是一种`离线算法`，需要使用`并查集`记录某个结点的祖先结点。做法如下：
+ `Tarjan 算法` 是一种 `离线算法` ，需要使用 `并查集` 记录某个结点的祖先结点。做法如下：
 
-1.  首先接受输入（邻接链表）、查询（存储在另一个邻接链表内）。查询边其实是虚拟加上去的边，为了方便，每次输入查询边的时候，将这个边及其反向边都加入到`queryEdge`数组里。
-2.  然后对其进行一次DFS遍历，同时使用`visited`数组进行记录某个结点是否被访问过、`parent`记录当前结点的父亲结点。
-3.  其中涉及到了`回溯思想`，我们每次遍历到某个结点的时候，认为这个结点的根结点就是它本身。让以这个结点为根节点的DFS全部遍历完毕了以后，再将`这个结点的根节点`设置为`这个结点的父一级结点`。
-4.  回溯的时候，如果以该节点为起点，`queryEdge`查询边的另一个结点也恰好访问过了，则直接更新查询边的LCA结果。
+1.  首先接受输入（邻接链表）、查询（存储在另一个邻接链表内）。查询边其实是虚拟加上去的边，为了方便，每次输入查询边的时候，将这个边及其反向边都加入到 `queryEdge` 数组里。
+2.  然后对其进行一次 DFS 遍历，同时使用 `visited` 数组进行记录某个结点是否被访问过、 `parent` 记录当前结点的父亲结点。
+3.  其中涉及到了 `回溯思想` ，我们每次遍历到某个结点的时候，认为这个结点的根结点就是它本身。让以这个结点为根节点的 DFS 全部遍历完毕了以后，再将 `这个结点的根节点` 设置为 `这个结点的父一级结点` 。
+4.  回溯的时候，如果以该节点为起点， `queryEdge` 查询边的另一个结点也恰好访问过了，则直接更新查询边的 LCA 结果。
 5.  最后输出结果。
 
 ```cpp
-#include<iostream>
-#include<algorithm>
+#include <algorithm>
+#include <iostream>
 using namespace std;
 
 class Edge {
-public:
-	int toVertex, fromVertex;
-	int next;
-	int LCA;
-	Edge() : toVertex(-1), fromVertex(-1), next(-1), LCA(-1) {};
-	Edge(int u, int v, int n) : fromVertex(u), toVertex(v), next(n), LCA(-1) {};
+ public:
+  int toVertex, fromVertex;
+  int next;
+  int LCA;
+  Edge() : toVertex(-1), fromVertex(-1), next(-1), LCA(-1){};
+  Edge(int u, int v, int n) : fromVertex(u), toVertex(v), next(n), LCA(-1){};
 };
 
 const int MAX = 100;
@@ -132,120 +134,133 @@ int parent[MAX], visited[MAX];
 int vertexCount, edgeCount, queryCount;
 
 void init() {
-	for (int i = 0; i <= vertexCount;i++) {
-		parent[i] = i;
-	}
+  for (int i = 0; i <= vertexCount; i++) {
+    parent[i] = i;
+  }
 }
 
 int find(int x) {
-	if (parent[x] == x) {
-		return x;
-	}
-	else {
-		return find(parent[x]);
-	}
+  if (parent[x] == x) {
+    return x;
+  } else {
+    return find(parent[x]);
+  }
 }
 
 void tarjan(int u) {
-	parent[u] = u;
-	visited[u] = 1;
+  parent[u] = u;
+  visited[u] = 1;
 
-	for (int i = head[u]; i != -1;i=edge[i].next) {
-		Edge& e = edge[i];
-		if (!visited[e.toVertex]) {
-			tarjan(e.toVertex);
-			parent[e.toVertex] = u;
-		}
-	}
+  for (int i = head[u]; i != -1; i = edge[i].next) {
+    Edge& e = edge[i];
+    if (!visited[e.toVertex]) {
+      tarjan(e.toVertex);
+      parent[e.toVertex] = u;
+    }
+  }
 
-	for (int i = queryHead[u]; i != -1;i=queryEdge[i].next) {
-		Edge& e = queryEdge[i];
-		if (visited[e.toVertex]) {
-			queryEdge[i ^ 1].LCA = e.LCA = find(e.toVertex);
-		}
-	}
+  for (int i = queryHead[u]; i != -1; i = queryEdge[i].next) {
+    Edge& e = queryEdge[i];
+    if (visited[e.toVertex]) {
+      queryEdge[i ^ 1].LCA = e.LCA = find(e.toVertex);
+    }
+  }
 }
 
 int main() {
-	memset(head, 0xff, sizeof(head));
-	memset(queryHead, 0xff, sizeof(queryHead));
+  memset(head, 0xff, sizeof(head));
+  memset(queryHead, 0xff, sizeof(queryHead));
 
-	cin >> vertexCount >> edgeCount >> queryCount;
-	int count = 0;
-	for (int i = 0; i < edgeCount;i++) {
-		int start = 0, end = 0;
-		cin >> start >> end;
+  cin >> vertexCount >> edgeCount >> queryCount;
+  int count = 0;
+  for (int i = 0; i < edgeCount; i++) {
+    int start = 0, end = 0;
+    cin >> start >> end;
 
-		edge[count] = Edge(start, end, head[start]);
-		head[start] = count;
-		count++;
+    edge[count] = Edge(start, end, head[start]);
+    head[start] = count;
+    count++;
 
-		edge[count] = Edge(end, start, head[end]);
-		head[end] = count;
-		count++;
-	}
+    edge[count] = Edge(end, start, head[end]);
+    head[end] = count;
+    count++;
+  }
 
-	count = 0;
-	for (int i = 0; i < queryCount;i++) {
-		int start = 0, end = 0;
-		cin >> start >> end;
+  count = 0;
+  for (int i = 0; i < queryCount; i++) {
+    int start = 0, end = 0;
+    cin >> start >> end;
 
-		queryEdge[count] = Edge(start, end, queryHead[start]);
-		queryHead[start] = count;
-		count++;
+    queryEdge[count] = Edge(start, end, queryHead[start]);
+    queryHead[start] = count;
+    count++;
 
-		queryEdge[count] = Edge(end, start, queryHead[end]);
-		queryHead[end] = count;
-		count++;
-	}
+    queryEdge[count] = Edge(end, start, queryHead[end]);
+    queryHead[end] = count;
+    count++;
+  }
 
+  init();
+  tarjan(1);
 
-	init();
-	tarjan(1);
+  for (int i = 0; i < queryCount; i++) {
+    Edge& e = queryEdge[i * 2];
+    cout << "(" << e.fromVertex << "," << e.toVertex << ") " << e.LCA << endl;
+  }
 
-	for (int i = 0; i < queryCount;i++) {
-		Edge& e = queryEdge[i * 2];
-		cout << "(" << e.fromVertex << "," << e.toVertex << ") " << e.LCA << endl;
-	}
-
-	return 0;
+  return 0;
 }
 ```
 
-### 转化为 RMQ 问题
+### 用欧拉序列转化为 RMQ 问题
 
-首先对树进行 dfs， `dfs(root, 1)` ，将深度和节点编号按顺序记录到数组中，并记录各个点在 dfs 序列中第一次出现的位置。
+对一棵树进行 DFS，无论是第一次访问还是回溯，每次到达一个结点时都将编号记录下来，可以得到一个长度为 $2n-1$ 的序列，这个序列被称作这棵树的欧拉序列（可以看成是这棵树的一条欧拉回路所经过的节点构成的序列）。
+
+在下文中，把结点 $u$ 在欧拉序列中第一次出现的位置编号记为 $pos(u)$ （也称作节点 $u$ 的欧拉序），把欧拉序列本身记作 $E[1..2n-1]$ 。
+
+有了欧拉序列，LCA 问题可以在线性时间内转化为 RMQ 问题，即 $pos(LCA(u, v))=\min\{pos(k)|k\in E[pos(u)..pos(v)]\}$ 。
+
+这个等式不难理解：从 $u$ 走到 $v$ 的过程中一定会经过 $LCA(u,v)$ ，但不会经过 $LCA(u,v)$ 的祖先。因此，从 $u$ 走到 $v$ 的过程中经过的欧拉序最小的结点就是 $LCA(u, v)$ 。
+
+用 DFS 计算欧拉序列的时间复杂度是 $O(n)$ ，且欧拉序列的长度也是 $O(n)$ ，所以 LCA 问题可以在 $O(n)$ 的时间内转化成等规模的 RMQ 问题。
+
+参考代码：
 
 ```cpp
-int depth[N * 2], id[N * 2], loc[N];
-int tot = 1;
-void dfs(int x, int dep) {
-  loc[x] = tot;
-  depth[tot] = dep;
-  id[tot] = x;
-  tot++;
-  for (int i = 0; i < v[x].size(); i++) {
-    dfs(v[x][i], dep + 1);
-    depth[tot] = dep;
-    id[tot] = x;
-    tot++;
+int dfn[N << 1], dep[N << 1], dfntot = 0;
+void dfs(int t, int depth) {
+  dfn[++dfntot] = t;
+  pos[t] = dfntot;
+  dep[dfntot] = depth;
+  for (int i = head[t]; i; i = side[i].next) {
+    dfs(side[i].to, t, depth + 1);
+    dfn[++dfntot] = t;
+    dep[dfntot] = depth;
   }
+}
+void st_preprocess() {
+  lg[0] = -1;  // 预处理 lg 代替库函数 log2 来优化常数
+  for (int i = 1; i <= (N << 1); ++i) lg[i] = lg[i >> 1] + 1;
+  for (int i = 1; i <= (N << 1) - 1; ++i) st[0][i] = dfn[i];
+  for (int i = 1; i <= lg[(N << 1) - 1]; ++i)
+    for (int j = 1; j + (1 << n) - 1 <= ((N << 1) - 1); ++j)
+      st[i][j] = dep[st[i - 1][j]] < dep[st[i - 1][j + (1 << i - 1)]
+                     ? st[i - 1][j]
+                     : st[i - 1][j + (1 << i - 1)];
 }
 ```
 
-然后对 depth 数组建立支持 RMQ 查询的数据结构，需要支持查询最小值所处位置。
+当我们需要查询某点对 $(u, v)$ 的 LCA 时，查询区间 $[\min\{pos[u], pos[v]\}, \max\{pos[u], pos[v]\}]$ 上最小值的所代表的节点即可。
 
-当我们需要查询某点对 `(u, v)` 的 LCA 时，需要先查询区间 `[min(loc[u], loc[v]), max(loc[u], loc[v])]` 上最小值的出现位置，设其为 `pos` ，则 `(u, v)` 的 LCA 为 `id[pos]` 。
-
-本算法不支持在线修改。
+若使用 ST 表来解决 RMQ 问题，那么该算法不支持在线修改，预处理的时间复杂度为 $O(n\log n)$ ，每次查询 LCA 的时间复杂度为 $O(1)$ 。
 
 ### 树链剖分
 
 LCA 为两个游标跳转到同一条重链上时深度较小的那个游标所指向的点。
 
-### 动态树
+###  [动态树](/ds/lct) 
 
-> 本节 **性质** 部分内容翻译自[wcipeg](http://wcipeg.com/wiki/Lowest_common_ancestor)，并做过修改。
+设连续两次 [access](/ds/lct/#access) 操作的点分别为 `u` 和 `v` ，则第二次 [access](/ds/lct/#access) 操作返回的点即为 `u` 和 `v` 的 LCA.
 
 ### 标准 RMQ
 
@@ -263,7 +278,7 @@ LCA 为两个游标跳转到同一条重链上时深度较小的那个游标所�
 
 每一步的复杂度都是 $O(N)$ 的，因此总复杂度依然是 $O(N)$ 。
 
-提供 RMQ 转标准 RMQ 的代码，为洛谷上 ST 表的例题[ **P3865** 【模板】ST 表](https://www.luogu.org/problemnew/show/P3865)
+提供 RMQ 转标准 RMQ 的代码，为洛谷上 ST 表的例题 [ **P3865** 【模板】ST 表](https://www.luogu.org/problemnew/show/P3865) 
 
 ```cpp
 // Copyright (C) 2018 Skqliao. All rights served.
@@ -454,3 +469,9 @@ int main() {
   return 0;
 }
 ```
+
+## 习题
+
+-    [祖孙询问](https://loj.ac/problem/10135) 
+-    [货车运输](https://loj.ac/problem/2610) 
+-    [点的距离](https://loj.ac/problem/10130) 
